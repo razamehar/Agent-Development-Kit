@@ -1,37 +1,27 @@
 from google.adk.agents import Agent
-import math
-from google.adk.tools import google_search
-from google.adk.tools import AgentTool
+from google.adk.tools import google_search, AgentTool
 
 
-def calculate_area(shape: str, value: float) -> dict:
-    """Calculate the area of a simple shape.
-
-    Args:
-        shape (str): The type of shape ("circle" or "square").
-        value (float): The radius (circle) or side length (square).
-
-    Returns:
-        dict: status and result or error msg.
-    """
-    if shape.lower() == "circle":
-        area = math.pi * value * value
-        return {"status": "success", "report": f"The area of the circle is {area:.2f}"} # make sure return is well defined.
-    elif shape.lower() == "square":
-        area = value * value
-        return {"status": "success", "report": f"The area of the square is {area:.2f}"}
+def convert_temperature(value: float, unit: str) -> dict:
+    """Convert temperature between Celsius and Fahrenheit."""
+    unit = unit.upper()
+    if unit == "C":
+        converted = (value * 9/5) + 32
+        return {"status": "success", "report": f"{value}°C is {converted:.2f}°F"}
+    elif unit == "F":
+        converted = (value - 32) * 5/9
+        return {"status": "success", "report": f"{value}°F is {converted:.2f}°C"}
     else:
         return {
             "status": "error",
-            "error_message": f"Sorry, I can only calculate areas for circles and squares, not {shape}.",
+            "error_message": f"Unknown unit {unit}. Please use 'C' or 'F'."
         }
 
 search_agent = Agent(
     model='gemini-2.0-flash-001',
     name='search_agent',
-    tools=[google_search],  # Using a custom tool
-    description='An assistant that helps with Query and search internet when needed.',
-    # change instruction to reflect google_search tool
+    tools=[google_search],
+    description='An assistant that helps with queries and searches the internet.',
     instruction='''
         You are a helpful Search assistant.
         When the user asks about current events or factual information, use the google_search tool.
@@ -44,10 +34,12 @@ search_agent_tool = AgentTool(search_agent)
 root_agent = Agent(
     model='gemini-2.0-flash-001',
     name='root_agent',
-    tools=[calculate_area,search_agent_tool],  # Using a custom tool
-    description='An assistant that helps with simple math problems.',
-    instruction='''You are a helpful math assistant.
-        When the user asks about the area of a shape, use the calculate_area tool.
+    tools=[convert_temperature, search_agent_tool],
+    description='An assistant that helps with temperature conversion and factual queries.',
+    instruction='''
+        You are a helpful assistant.
+        Use the convert_temperature tool for temperature conversion questions.
+        Use the search tool for factual queries.
         Always return a clear, short explanation.
     '''
 )
