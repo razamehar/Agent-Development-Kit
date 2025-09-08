@@ -6,15 +6,15 @@ from crewai_tools import SerperDevTool
 dotenv.load_dotenv()
 
 
-
 SERPER_API_KEY = os.getenv('SERPER_API_KEY')
+
 if not SERPER_API_KEY:
     raise ValueError("SERPER_API_KEY environment variable is not set.")
 
 serper_crewai_tool = SerperDevTool(
-    country="in",
-    locale="in",
-    location="Mumbai, Maharashtra, India",
+    country="it",
+    locale="it",
+    location="Italy",
     n_results=10,
 )
 
